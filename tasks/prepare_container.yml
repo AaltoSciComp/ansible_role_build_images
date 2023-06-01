@@ -1,0 +1,26 @@
+---
+# tasks file for ansible_role_build_images
+
+ - name: container_name
+   ansible.builtin.debug:
+      msg: "{{container_name}} {{base_container_image}}"
+
+ - name: Make sure there is no base container yet
+   containers.podman.podman_container:
+      name: "{{container_name}}"
+      state: absent
+
+ - name: Create and start the base container
+   containers.podman.podman_container:
+      name:  "{{container_name}}"
+      image: "{{base_container_image}}"
+      state: "started"
+      remove: yes
+      entrypoint: "/usr/sbin/init"
+      #init: yes
+      recreate: yes
+
+
+
+
+    

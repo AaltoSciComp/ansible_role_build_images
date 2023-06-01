@@ -1,0 +1,26 @@
+all:
+  hosts:
+    rhel001
+  children:
+    ww4_images:
+      hosts:
+
+        compute_image_rocky92:
+          base_container_image:    "docker://ghcr.io/hpcng/warewulf-rockylinux:9"
+          container_image:     "ww4_compute_image_rocky92"
+          container_image_tag: "92"
+          ww4_container: "compute_image_rocky92"
+          ww4_import: true
+          reg_image: "{{registry_url}}/compute_image_rocky92"
+          reg_image_tag: "1.0"
+          reg_export: false
+          
+        compute_image_rocky92b:
+          base_container_image:  "docker://ghcr.io/hpcng/warewulf-rockylinux:9"
+          container_image:     "ww4_gpu_image_rocky92"
+          container_image_tag: "92"
+          ww4_container: "gpu_image_rocky92b"
+          ww4_import: false
+          reg_image: "{{registry_url}}/gpu_image_rocky92"
+          reg_image_tag: "1.0"
+          reg_export: true

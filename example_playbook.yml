@@ -1,0 +1,89 @@
+---
+
+- name: Prepare a base container
+#  hosts: "{{ww4_host}}"
+  hosts: rhel001
+  remote_user: root
+
+
+# https://stackoverflow.com/questions/30192490/include-tasks-from-another-role-in-ansible-playbook
+
+  tasks:
+
+#  - name: with_items
+#    ansible.builtin.debug:
+#      msg: "{{ item }}"
+#    loop: "{{groups['ww4_images']}}"
+
+#  - name: hostvar
+#    ansible.builtin.debug:
+#      msg: "{{hostvars['compute_image'].container_name}}"
+
+#  - name: container_name
+#    ansible.builtin.debug:
+#      msg: "{{hostvars[item|quote].container_name}}"
+#    loop: "{{groups['ww4_images']}}"
+
+#  - name: base_container_image
+#    ansible.builtin.debug:
+#      msg: "{{hostvars[item|quote].base_container_image}}"
+#    loop: "{{groups['ww4_images']}}"
+
+  - name: prepare containers
+    ansible.builtin.include_role:
+      name: ansible_role_build_images
+      tasks_from: prepare_container
+    vars:
+      container_name: "{{item}}"
+      base_container_image: "{{hostvars[item|quote].base_container_image}}"
+    loop: "{{groups['ww4_images']}}"
+
+
+- name: Modify the running container
+  hosts: ww4_images
+
+  connection: containers.podman.podman
+
+  vars:
+    ansible_podman_executable: "/usr/bin/podman-remote"
+    ansible_podman_extra_args: "--connection {{ww4_host}}"
+
+  tasks:
+
+  - name: Install packages to the container
+    ansible.builtin.dnf:
+      name: "{{packages_to_install}}"
+      state: present
+      allowerasing: yes
+
+
+  - name: Install lustre
+    ansible.builtin.include_role:
+      name: ansible_role_lustre
+      tasks_from: install_binary_rpms
+
+
+- name: Save the modified container
+#  hosts: "{{ww4_host}}"
+  hosts: rhel001
+  remote_user: root
+
+  tasks:
+
+  - name: Save container as ww4 images and/or export to registry
+    ansible.builtin.include_role:
+      name: ansible_role_build_images
+      tasks_from: save_container
+    vars:
+      container_name:               "{{item}}"
+      container_image:     "{{hostvars[item|quote].container_image    }}"
+      container_image_tag: "{{hostvars[item|quote].container_image_tag}}"
+      ww4_container:       "{{hostvars[item|quote].ww4_container}}"
+      ww4_import:          "{{hostvars[item|quote].ww4_import}}"
+      reg_export:          "{{hostvars[item|quote].reg_export}}"
+      reg_image:           "{{hostvars[item|quote].reg_image}}"
+      reg_image_tag:       "{{hostvars[item|quote].reg_image_tag}}"
+    loop: "{{groups['ww4_images']}}"
+
+
+

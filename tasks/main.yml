@@ -1,0 +1,9 @@
+---
+# tasks file for ansible_role_build_images
+
+- name: Compile Lustre
+  ansible.builtin.include: prepare_container.yml
+
+- name: Install RPMs
+  ansible.builtin.include: save_container.yml
+

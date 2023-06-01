@@ -1,0 +1,15 @@
+---
+# defaults file for ansible_role_build_images
+
+
+base_container_image:  "docker://ghcr.io/hpcng/warewulf-rockylinux:9"     # start building from this container
+container_name:        "myContainer"                                      # container name in podman, used as the "hostname" in ansible
+container_image:       "myWw4Container"                                   # save the podman container as this image in podman
+container_image_tag:   "1.0"                                              # save the podman container with this tag in podman
+ww4_container:         "myImage"                                          # save the podman container as this container in warewulf
+ww4_import:            false                                              # import the podman container to warewulf or not?
+reg_image:             "myImage"                                          # save the podman container as this image in the container registry or not?
+reg_export:            false                                              # export the podman container to the registry
+
+
+

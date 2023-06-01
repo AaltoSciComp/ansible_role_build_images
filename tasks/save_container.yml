@@ -1,0 +1,58 @@
+---
+# tasks file for ansible_role_build_images
+
+  - name: container_name
+    ansible.builtin.debug:
+      msg: "{{container_name}} {{container_image}}:{{container_image_tag}} ww4_import={{ww4_import|bool}} ww4_container={{ww4_container}} reg_export={{reg_export|bool}} reg_image={{reg_image}}:{{reg_image_tag}}"
+
+
+  # Is there really no role for this task?
+  - name: Podman-commit the image
+    ansible.builtin.shell: "podman commit --pause {{container_name}} {{container_image}}:{{container_image_tag}}"
+
+  - name: Stop the container
+    containers.podman.podman_container:
+      name: "{{container_name}}"
+      state: stopped
+
+
+  - name: Create temporary folder for the .tar
+    ansible.builtin.tempfile:
+      state: directory
+      suffix: container_storage
+    register: tmp_folder_for_container
+    when: "ww4_import|bool"
+
+  - name: Save the container into a tar archive
+    containers.podman.podman_save:
+      dest: "{{tmp_folder_for_container.path}}/{{container_image}}_{{container_image_tag}}.tar"
+      format: docker-archive
+      image: "localhost/{{container_image}}:{{container_image_tag}}"
+    when: "ww4_import|bool"
+
+
+  - name: Import the container to warewulf
+    ansible.builtin.shell: "wwctl container --update -v import file://{{tmp_folder_for_container.path}}/{{container_image}}_{{container_image_tag}}.tar {{ww4_container}}"
+    when: "ww4_import|bool"
+    
+  - name: Remove the temporary folder
+    ansible.builtin.file:
+      path: "{{tmp_folder_for_container.path}}"
+      state: absent
+    when: tmp_folder_for_container.path is defined
+
+
+  - name: Podman-tag the image for export
+    containers.podman.podman_tag:
+      image: "localhost/{{container_image}}:{{container_image_tag}}"
+      target_names:
+      - "{{reg_image}}:{{reg_image_tag}}"
+    when: "reg_export|bool"
+
+  # Make sure to "podman login {{registry_url}}" first manually!
+  - name: Push the image to the registry
+    containers.podman.podman_image:
+      name: "{{reg_image}}:{{reg_image_tag}}"
+      push: yes
+#      validate_certs: false
+    when: "reg_export|bool"
