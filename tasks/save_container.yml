@@ -49,10 +49,13 @@
       - "{{reg_image}}:{{reg_image_tag}}"
     when: "reg_export|bool"
 
-  # Make sure to "podman login {{registry_url}}" first manually!
+  # Make sure to
+  # - "podman login {{registry_url}}" first manually!
+  # - "cp ${XDG_RUNTIME_DIR}/containers/auth.json {{ registry_auth_file }}"
   - name: Push the image to the registry
     containers.podman.podman_image:
       name: "{{reg_image}}:{{reg_image_tag}}"
       push: yes
 #      validate_certs: false
+      auth_file: "{{ registry_auth_file }}"
     when: "reg_export|bool"
