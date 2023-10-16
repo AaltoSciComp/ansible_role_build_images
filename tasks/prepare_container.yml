@@ -9,6 +9,7 @@
    containers.podman.podman_container:
       name: "{{container_name}}"
       state: absent
+   when: "remove_base_container"
 
  - name: Create and start the base container
    containers.podman.podman_container:

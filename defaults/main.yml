@@ -10,6 +10,6 @@ ww4_container:         "myImage"                                          # save
 ww4_import:            false                                              # import the podman container to warewulf or not?
 reg_image:             "myImage"                                          # save the podman container as this image in the container registry or not?
 reg_export:            false                                              # export the podman container to the registry
-
+remove_base_container: true                                               # Remove the base container in the beginning.
 
 

@@ -15,32 +15,35 @@
       name: "{{container_name}}"
       state: stopped
 
+  # - name: Save a tar archive of the container and important that ww4. (Obsolete & deprecated with registry)
+  #   ansible.builtin.block:
+  #   - name: Create temporary folder for the .tar
+  #     ansible.builtin.tempfile:
+  #       state: directory
+  #       suffix: container_storage
+  #     register: tmp_folder_for_container
+  #     when: "ww4_import|bool"
 
-  - name: Create temporary folder for the .tar
-    ansible.builtin.tempfile:
-      state: directory
-      suffix: container_storage
-    register: tmp_folder_for_container
-    when: "ww4_import|bool"
-
-  - name: Save the container into a tar archive
-    containers.podman.podman_save:
-      dest: "{{tmp_folder_for_container.path}}/{{container_image}}_{{container_image_tag}}.tar"
-      format: docker-archive
-      image: "localhost/{{container_image}}:{{container_image_tag}}"
-    when: "ww4_import|bool"
+  #   - name: Save the container into a tar archive
+  #     containers.podman.podman_save:
+  #       dest: "{{tmp_folder_for_container.path}}/{{container_image}}_{{container_image_tag}}.tar"
+  #       format: docker-archive
+  #       image: "localhost/{{container_image}}:{{container_image_tag}}"
+  #     when: "ww4_import|bool"
 
 
-  - name: Import the container to warewulf
-    ansible.builtin.shell: "wwctl container --update -v import file://{{tmp_folder_for_container.path}}/{{container_image}}_{{container_image_tag}}.tar {{ww4_container}}"
-    when: "ww4_import|bool"
-    
-  - name: Remove the temporary folder
-    ansible.builtin.file:
-      path: "{{tmp_folder_for_container.path}}"
-      state: absent
-    when: tmp_folder_for_container.path is defined
+  #   - name: Import the container to warewulf
+  #     ansible.builtin.shell: "wwctl container --update -v import file://{{tmp_folder_for_container.path}}/{{container_image}}_{{container_image_tag}}.tar {{ww4_container}}"
+  #     when: "ww4_import|bool"
 
+  #   - name: Remove the temporary folder
+  #     ansible.builtin.file:
+  #       path: "{{tmp_folder_for_container.path}}"
+  #       state: absent
+  #     when: tmp_folder_for_container.path is defined
+
+  #   # Do not run this block. Deprecated.
+  #   when: false
 
   - name: Podman-tag the image for export
     containers.podman.podman_tag:
