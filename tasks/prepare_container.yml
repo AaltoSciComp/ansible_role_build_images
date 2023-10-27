@@ -5,11 +5,28 @@
    ansible.builtin.debug:
       msg: "{{container_name}} {{base_container_image}}"
 
+ - name: Check if the base container already exists
+   ansible.builtin.command: "podman container exists {{ container_name }}"
+   register: base_container_exists
+   ignore_errors: yes
+
+
+# - name: Run a task if the command returns zero exit status
+#   debug:
+#     msg: "The command was successful (exit status 0)"
+#   when: base_container_exists.rc == 0
+#
+# - name: Run a different task if the command returns a non-zero exit status
+#   debug:
+#     msg: "The command was not successful (exit status {{ command_result.rc }})"
+#   when: base_container_exists.rc != 0
+
+
  - name: Make sure there is no base container yet
    containers.podman.podman_container:
       name: "{{container_name}}"
       state: absent
-   when: "remove_base_container"
+   when: '"remove_base_container" and base_container_exists.rc == 0'
 
  - name: Create and start the base container
    containers.podman.podman_container:
@@ -20,8 +37,13 @@
       entrypoint: "/usr/sbin/init"
       #init: yes
       recreate: yes
+   when: base_container_exists.rc != 0
 
-
-
-
-    
+ - name: Start the base container
+   containers.podman.podman_container:
+      name:  "{{container_name}}"
+      image: "{{base_container_image}}"
+      state: "started"
+      remove: yes
+      entrypoint: "/usr/sbin/init"
+   when: base_container_exists.rc == 0
