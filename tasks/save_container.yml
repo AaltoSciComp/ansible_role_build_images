@@ -15,50 +15,27 @@
       name: "{{container_name}}"
       state: stopped
 
-  # - name: Save a tar archive of the container and important that ww4. (Obsolete & deprecated with registry)
-  #   ansible.builtin.block:
-  #   - name: Create temporary folder for the .tar
-  #     ansible.builtin.tempfile:
-  #       state: directory
-  #       suffix: container_storage
-  #     register: tmp_folder_for_container
-  #     when: "ww4_import|bool"
-
-  #   - name: Save the container into a tar archive
-  #     containers.podman.podman_save:
-  #       dest: "{{tmp_folder_for_container.path}}/{{container_image}}_{{container_image_tag}}.tar"
-  #       format: docker-archive
-  #       image: "localhost/{{container_image}}:{{container_image_tag}}"
-  #     when: "ww4_import|bool"
-
-
-  #   - name: Import the container to warewulf
-  #     ansible.builtin.shell: "wwctl container --update -v import file://{{tmp_folder_for_container.path}}/{{container_image}}_{{container_image_tag}}.tar {{ww4_container}}"
-  #     when: "ww4_import|bool"
-
-  #   - name: Remove the temporary folder
-  #     ansible.builtin.file:
-  #       path: "{{tmp_folder_for_container.path}}"
-  #       state: absent
-  #     when: tmp_folder_for_container.path is defined
-
-  #   # Do not run this block. Deprecated.
-  #   when: false
-
-  - name: Podman-tag the image for export
+  # allow multiple tags via reg_image_tag array
+  - name: Podman-tag the image for export 
     containers.podman.podman_tag:
       image: "localhost/{{container_image}}:{{container_image_tag}}"
       target_names:
-      - "{{reg_image}}:{{reg_image_tag}}"
+      - "{{ reg_image }}:{{ tagitem }}"
     when: "reg_export|bool"
+    loop: "{{ reg_image_tag }}"
+    loop_control:
+      loop_var: tagitem
 
   # Make sure to
   # - "podman login {{registry_url}}" first manually!
   # - "cp ${XDG_RUNTIME_DIR}/containers/auth.json {{ registry_auth_file }}"
   - name: Push the image to the registry
     containers.podman.podman_image:
-      name: "{{reg_image}}:{{reg_image_tag}}"
+      name: "{{ reg_image }}:{{ tagitem }}"
       push: yes
 #      validate_certs: false
       auth_file: "{{ registry_auth_file }}"
     when: "reg_export|bool"
+    loop: "{{ reg_image_tag }}"
+    loop_control:
+      loop_var: tagitem
