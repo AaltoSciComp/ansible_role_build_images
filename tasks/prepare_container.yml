@@ -28,7 +28,7 @@
       state: absent
    when: '"remove_base_container" and base_container_exists.rc == 0'
 
- - name: Create and start the base container
+ - name: Create and start the base container (recreate=yes)
    containers.podman.podman_container:
       name:  "{{container_name}}"
       image: "{{base_container_image}}"
