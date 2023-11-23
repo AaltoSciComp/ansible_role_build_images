@@ -54,7 +54,8 @@
  - name: Start the base container
    containers.podman.podman_container:
       name:  "{{container_name}}"
-      image: "{{base_container_image}}"
+      #image: "{{base_container_image}}"
+      image: "{{base_container_image_information['image'][0]['Id']}}" # use this to force using the local image and not pulling without auth_file
       state: "started"
       remove: yes
       entrypoint: "/usr/sbin/init"
