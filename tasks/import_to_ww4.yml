@@ -5,10 +5,11 @@
     ansible.builtin.debug:
       msg: "{{container_name}} {{container_image}}:{{container_image_tag}} ww4_import={{ww4_import|bool}} ww4_container={{ww4_container}} reg_export={{reg_export|bool}} reg_image={{reg_image}}:{{reg_image_tag}}"
 
-
+  - name: Log in to a container registry using Podman
+    command: "podman login -u {{ registry_username }} -p {{ registry_password }} {{ registry_url }}"
+    when: registry_url is defined and registry_username is defined and registry_password is defined and registry_url | length > 0 and registry_username | length > 0 and registry_password | length > 0
 
   - name: Import the container to warewulf
     #ansible.builtin.shell: "wwctl container --update -v import file://{{tmp_folder_for_container.path}}/{{container_image}}_{{container_image_tag}}.tar {{ww4_container}}"
     ansible.builtin.shell: "wwctl container --update -v import docker://{{reg_image}}:{{reg_image_tag}} {{ww4_container}}"
     when: "ww4_import|bool"
-    

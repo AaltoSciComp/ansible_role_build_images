@@ -12,4 +12,6 @@ reg_image:             "myImage"                                          # save
 reg_export:            false                                              # export the podman container to the registry
 remove_base_container: true                                               # Remove the base container in the beginning.
 
-
+registry_url:          ""                                                 # If you are using a specific registry to import from
+registry_username:     ""                                                 # And need to provide username and password.
+registry_password:     ""                                                 # Consider ansible_vault to store the password.
