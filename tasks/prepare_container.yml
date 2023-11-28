@@ -21,11 +21,16 @@
 #     msg: "The command was not successful (exit status {{ command_result.rc }})"
 #   when: base_container_exists.rc != 0
 
+ - name: Log in to a container registry using Podman
+   command: "podman login -u {{ registry_username }} -p {{ registry_password }} {{ registry_url }}"
+   when: registry_url is defined and registry_username is defined and registry_password is defined and registry_url | length > 0 and registry_username | length > 0 and registry_password | length > 0
+
+
 # This is done in a separate step to allow for auth_file
  - name: Pull the base container image
    containers.podman.podman_image:
       name: "{{base_container_image}}"
-      auth_file: "{{ registry_auth_file }}"
+#      auth_file: "{{ registry_auth_file }}"
    register: base_container_image_information
 
  - name: Print base_container_image_information
