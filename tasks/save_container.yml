@@ -8,7 +8,7 @@
 
   # Is there really no role for this task?
   - name: Podman-commit the image
-    ansible.builtin.shell: "podman commit --pause {{container_name}} {{container_image}}:{{container_image_tag}}"
+    ansible.builtin.shell: "podman commit --pause {{container_name}} {{reg_image}}:{{container_image_tag}}"
 
   - name: Stop the container
     containers.podman.podman_container:
@@ -18,10 +18,10 @@
   # allow multiple tags via reg_image_tag array
   - name: Podman-tag the image for export 
     containers.podman.podman_tag:
-      image: "localhost/{{container_image}}:{{container_image_tag}}"
+      image: "{{reg_image}}:{{container_image_tag}}"
       target_names:
       - "{{ reg_image }}:{{ tagitem }}"
-    when: "reg_export|bool"
+    when: reg_export and tagitem != container_image_tag
     loop: "{{ reg_image_tag }}"
     loop_control:
       loop_var: tagitem
