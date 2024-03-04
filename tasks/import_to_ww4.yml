@@ -10,6 +10,5 @@
     when: registry_url is defined and registry_username is defined and registry_password is defined and registry_url | length > 0 and registry_username | length > 0 and registry_password | length > 0
 
   - name: Import the container to warewulf
-    #ansible.builtin.shell: "wwctl container --update -v import file://{{tmp_folder_for_container.path}}/{{container_image}}_{{container_image_tag}}.tar {{ww4_container}}"
-    ansible.builtin.shell: "wwctl container --update -v import docker://{{reg_image}}:{{reg_image_tag}} {{ww4_container}}"
+    ansible.builtin.shell: "wwctl container --force -v import docker://{{reg_image}}:{{reg_image_tag}} {{ww4_container}}"
     when: "ww4_import|bool"
