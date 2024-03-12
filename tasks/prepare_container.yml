@@ -8,18 +8,9 @@
  - name: Check if the base container already exists
    ansible.builtin.command: "podman container exists {{ container_name }}"
    register: base_container_exists
-   ignore_errors: yes
+   changed_when: False
+   failed_when: base_container_exists.rc not in [0,1]
 
-
-# - name: Run a task if the command returns zero exit status
-#   debug:
-#     msg: "The command was successful (exit status 0)"
-#   when: base_container_exists.rc == 0
-#
-# - name: Run a different task if the command returns a non-zero exit status
-#   debug:
-#     msg: "The command was not successful (exit status {{ command_result.rc }})"
-#   when: base_container_exists.rc != 0
 
  - name: Log in to a container registry using Podman
    command: "podman login -u {{ registry_username }} -p {{ registry_password }} {{ registry_url }}"
