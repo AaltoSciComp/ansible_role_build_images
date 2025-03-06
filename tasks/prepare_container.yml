@@ -18,15 +18,19 @@
 
 
 # This is done in a separate step to allow for auth_file
- - name: Pull the base container image
-   containers.podman.podman_image:
-      name: "{{base_container_image}}"
+# - name: Pull the base container image
+#   containers.podman.podman_image:
+#      name: "{{base_container_image}}"
 #      auth_file: "{{ registry_auth_file }}"
-   register: base_container_image_information
+#   register: base_container_image_information
 
- - name: Print base_container_image_information
-   ansible.builtin.debug:
-      msg: "{{base_container_image_information['image'][0]['Id']}}"
+# - name: Print base_container_image_information
+#   ansible.builtin.debug:
+#      msg: "{{base_container_image_information}}"
+#
+# - name: Print base_container_image_information of image 0 id
+#   ansible.builtin.debug:
+#      msg: "{{base_container_image_information['image'][0]['Id']}}"
 
  - name: Make sure there is no base container yet
    containers.podman.podman_container:
@@ -38,8 +42,8 @@
  - name: Create and start the base container (recreate=yes)
    containers.podman.podman_container:
       name:  "{{container_name}}"
-      #image: "{{base_container_image}}"
-      image: "{{base_container_image_information['image'][0]['Id']}}" # use this to force using the local image and not pulling without auth_file
+      image: "{{base_container_image}}"
+#      image: "{{base_container_image_information['image'][0]['Id']}}" # use this to force using the local image and not pulling without auth_file
       state: "started"
       remove: yes
       entrypoint: "/usr/sbin/init"
@@ -50,8 +54,8 @@
  - name: Start the base container
    containers.podman.podman_container:
       name:  "{{container_name}}"
-      #image: "{{base_container_image}}"
-      image: "{{base_container_image_information['image'][0]['Id']}}" # use this to force using the local image and not pulling without auth_file
+      image: "{{base_container_image}}"
+#      image: "{{base_container_image_information['image'][0]['Id']}}" # use this to force using the local image and not pulling without auth_file
       state: "started"
       remove: yes
       entrypoint: "/usr/sbin/init"
